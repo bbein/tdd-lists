@@ -19,6 +19,14 @@ class NewVisitorTest(unittest.TestCase):
     def tearDown(self):
         self.browser.quit()
 
+    def check_for_row_in_list_table(self, row_txt):
+        """
+        checks if `row_text` is the text of one of the rows in the table
+        """
+        table = self.browser.find_element_by_id('id_list_table')
+        rows = table.find_elements_by_tag_name('tr')
+        self.assertIn(row_txt, [row.text for row in rows])
+
     def test_can_start_a_list_and_retrive_it_later(self):
         """
         Functional test that we can start a list and retrive it later.
@@ -31,7 +39,7 @@ class NewVisitorTest(unittest.TestCase):
         self.assertIn('To-Do', self.browser.title)
         header_text = self.browser.find_element_by_tag_name('h1').text
         self.assertIn('To-Do', header_text)
-        
+
         # She is invited to enter a to-do item straight away
         inputbox = self.browser.find_element_by_id('id_new_item')
         self.assertEqual(
@@ -48,10 +56,7 @@ class NewVisitorTest(unittest.TestCase):
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
 
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.assertIn("1: Buy peacock feathers", [row.text for row in rows])
-
+        self.check_for_row_in_list_table("1: Buy peacock feathers")
         # There is still a text box inviting her o add another item.
         # She enters "Use peacock feather to make a fly" (Edith is very methodical)
         inputbox = self.browser.find_element_by_id('id_new_item')
@@ -59,11 +64,9 @@ class NewVisitorTest(unittest.TestCase):
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
 
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.assertIn("2: Use peacock feather to make a fly", [row.text for row in rows])
-
         # The page updates again, and now shows both items on her list.
+        self.check_for_row_in_list_table("1: Buy peacock feathers")
+        self.check_for_row_in_list_table("2: Use peacock feather to make a fly")
 
         # Edith wonders whether the site will remember her list.
         # Then she notices that the site has generated a unique URL for her
