@@ -2,13 +2,13 @@
 Functional tests for the TDD Book Chapter 1 to ...
 """
 
-import unittest
 import time
 
+from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
     """
     Functional test for a new visitor to the website.
     """
@@ -33,7 +33,7 @@ class NewVisitorTest(unittest.TestCase):
         """
         # Edith has heard about a cool new online to-do app. She goes
         # to check it out its hompage
-        self.browser.get('http:\\localhost:8000')
+        self.browser.get(self.live_server_url)
 
         # She notices the page title and header mention to-do lists
         self.assertIn('To-Do', self.browser.title)
@@ -77,5 +77,3 @@ class NewVisitorTest(unittest.TestCase):
 
         # Satisfied, she goes back to sleep
 
-if __name__ == "__main__":
-    unittest.main(warnings='ignore')
