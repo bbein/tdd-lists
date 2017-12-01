@@ -7,6 +7,9 @@ import time
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import WebDriverException
+
+MAX_WAIT = 10
 
 class NewVisitorTest(LiveServerTestCase):
     """
@@ -23,11 +26,19 @@ class NewVisitorTest(LiveServerTestCase):
         """
         checks if `row_text` is the text of one of the rows in the table
         """
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.assertIn(row_txt, [row.text for row in rows])
+        start_time = time.time()
+        while True:
+            try:
+                table = self.browser.find_element_by_id('id_list_table')
+                rows = table.find_elements_by_tag_name('tr')
+                self.assertIn(row_txt, [row.text for row in rows])
+                return
+            except (AssertionError, WebDriverException) as exc:
+                if time.time() - start_time > MAX_WAIT:
+                    raise exc
+                time.sleep(0.1)
 
-    def test_can_start_a_list_and_retrive_it_later(self):
+    def test_can_start_a_list_for_one_user(self):
         """
         Functional test that we can start a list and retrive it later.
         """
@@ -54,7 +65,6 @@ class NewVisitorTest(LiveServerTestCase):
         # When she hits enter, the page updates and now the page lists
         # "1: Buy peacock feathers" as an item in a to-do list
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
 
         self.check_for_row_in_list_table("1: Buy peacock feathers")
         # There is still a text box inviting her o add another item.
@@ -62,18 +72,58 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox = self.browser.find_element_by_id('id_new_item')
         inputbox.send_keys("Use peacock feather to make a fly")
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
 
         # The page updates again, and now shows both items on her list.
         self.check_for_row_in_list_table("1: Buy peacock feathers")
         self.check_for_row_in_list_table("2: Use peacock feather to make a fly")
 
+        # Satisfied, she goes back to sleep
+
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+        # Edith starts a new to-do list
+        self.browser.get(self.live_server_url)
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys("Buy peacock feathers")
+        inputbox.send_keys(Keys.ENTER)
+        self.check_for_row_in_list_table("1: Buy peacock feathers")
+
+        # She notices that her list has a unique URL
+        edith_list_url = self.browser.current_url
+        self.assertRegex(edith_list_url, '/lists/.+')
+
+        # Now a new user, Frances, comes along to the site.
+
+        ## We use a new Browser session to make sure that no information
+        ## of Edith's is coming through from cookies etc.
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
+
+        # Frances visit the home page. There is no sign of Edith's list
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertNotIn('make a fly', page_text)
+
+        # Francs starts a new list by enteringa new item.
+        # He is less interesting than Edith...
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys("Buy milk")
+        inputbox.send_keys(Keys.ENTER)
+        self.check_for_row_in_list_table("1: Buy milk")
+
+        # Frances gets his own unique URL
+        francis_list_url = self.browser.current_url
+        self.assertRegex(francis_list_url, '/lists/.+')
+        self.assertNotEqual(francis_list_url, edith_list_url)
+
+        # Again there is no trace of Edith's list
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertNotIn('make a fly', page_text)
+        self.assertIn("Buy milk", page_text)
+        # She visits that URL - her to-do list is still there.
+
+        
         # Edith wonders whether the site will remember her list.
         # Then she notices that the site has generated a unique URL for her
         # -- there is some explanatory text to that effect.
-        self.fail("Finish the test!")
-
-        # She visits that URL - her to-do list is still there.
-
-        # Satisfied, she goes back to sleep
-
