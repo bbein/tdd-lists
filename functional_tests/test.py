@@ -121,9 +121,19 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertNotIn('Buy peacock feathers', page_text)
         self.assertNotIn('make a fly', page_text)
         self.assertIn("Buy milk", page_text)
-        # She visits that URL - her to-do list is still there.
+    
+    def test_layout_and_styling(self):
+        # Edith goes to the homepage
+        self.browser.get(self.live_server_url)
+        self.browser.set_window_size(1024, 768)
 
-        
-        # Edith wonders whether the site will remember her list.
-        # Then she notices that the site has generated a unique URL for her
-        # -- there is some explanatory text to that effect.
+        # She notices the input box is nicely centered
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width']/2, 512, delta=10)
+
+        # She satrts a new list and sees the inout is centered there too
+        inputbox.send_keys("Buy peacock feathers")
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy peacock feathers')
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width']/2, 512, delta=10)
