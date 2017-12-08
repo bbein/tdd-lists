@@ -4,14 +4,14 @@ Functional tests for the TDD Book Chapter 1 to ...
 
 import time
 
-from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import WebDriverException
 
 MAX_WAIT = 10
 
-class NewVisitorTest(LiveServerTestCase):
+class NewVisitorTest(StaticLiveServerTestCase):
     """
     Functional test for a new visitor to the website.
     """
@@ -134,6 +134,6 @@ class NewVisitorTest(LiveServerTestCase):
         # She satrts a new list and sees the inout is centered there too
         inputbox.send_keys("Buy peacock feathers")
         inputbox.send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: Buy peacock feathers')
+        self.check_for_row_in_list_table('1: Buy peacock feathers')
         inputbox = self.browser.find_element_by_id('id_new_item')
         self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width']/2, 512, delta=10)
