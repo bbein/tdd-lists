@@ -1,46 +1,15 @@
 """
-Functional tests for the TDD Book Chapter 1 to ...
+File to test list creation in the super lists app.
 """
-
-import os
-import time
-
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import WebDriverException
 
-MAX_WAIT = 10
+from .base import SuperListsFunctionalTest
 
-class NewVisitorTest(StaticLiveServerTestCase):
+class NewVisitorTest(SuperListsFunctionalTest):
     """
     Functional test for a new visitor to the website.
     """
-
-    def setUp(self):
-        self.browser = webdriver.Firefox()
-        staging_server = os.environ.get('STAGING_SERVER')
-        if staging_server:
-            self.live_server_url = 'http://' + staging_server
-    def tearDown(self):
-        self.browser.quit()
-
-    def check_for_row_in_list_table(self, row_txt):
-        """
-        checks if `row_text` is the text of one of the rows in the table
-        """
-        start_time = time.time()
-        while True:
-            try:
-                table = self.browser.find_element_by_id('id_list_table')
-                rows = table.find_elements_by_tag_name('tr')
-                self.assertIn(row_txt, [row.text for row in rows])
-                return
-            except (AssertionError, WebDriverException) as exc:
-                if time.time() - start_time > MAX_WAIT:
-                    raise exc
-                time.sleep(0.1)
-
     def test_can_start_a_list_for_one_user(self):
         """
         Functional test that we can start a list and retrive it later.
@@ -83,6 +52,9 @@ class NewVisitorTest(StaticLiveServerTestCase):
         # Satisfied, she goes back to sleep
 
     def test_multiple_users_can_start_lists_at_different_urls(self):
+        """
+        Functional test that we can have more than one user.
+        """
         # Edith starts a new to-do list
         self.browser.get(self.live_server_url)
         inputbox = self.browser.find_element_by_id('id_new_item')
@@ -124,19 +96,3 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.assertNotIn('Buy peacock feathers', page_text)
         self.assertNotIn('make a fly', page_text)
         self.assertIn("Buy milk", page_text)
-    
-    def test_layout_and_styling(self):
-        # Edith goes to the homepage
-        self.browser.get(self.live_server_url)
-        self.browser.set_window_size(1024, 768)
-
-        # She notices the input box is nicely centered
-        inputbox = self.browser.find_element_by_id('id_new_item')
-        self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width']/2, 512, delta=10)
-
-        # She satrts a new list and sees the inout is centered there too
-        inputbox.send_keys("Buy peacock feathers")
-        inputbox.send_keys(Keys.ENTER)
-        self.check_for_row_in_list_table('1: Buy peacock feathers')
-        inputbox = self.browser.find_element_by_id('id_new_item')
-        self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width']/2, 512, delta=10)
