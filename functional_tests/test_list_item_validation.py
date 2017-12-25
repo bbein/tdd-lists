@@ -2,6 +2,7 @@
 Input validation tests for the Super Lists App.
 """
 from unittest import skip
+from time import sleep
 
 from selenium.webdriver.common.keys import Keys
 
@@ -22,11 +23,12 @@ class ItemValidationTest(SuperListsFunctionalTest):
 
         # The home page refreshes, and there is an error message saying
         # tha list items cannot be blank
-        wait_for(self.assertEqual,
+        wait_for(lambda: self.assertEqual(
                  self.browser.find_element_by_css_selector('.has-error').text,
-                 "You can't have an empty list item"
+                 "You can't have an empty list item")
                 )
         # She tries again with some text for the tem, which now works
+        self.browser.get(self.live_server_url)
         self.browser.find_element_by_id('id_new_item').send_keys('Buy milk')
         self.browser.find_element_by_id('id_new_item').send_keys(Keys.ENTER)
         self.check_for_row_in_list_table('1: Buy milk')
@@ -35,12 +37,14 @@ class ItemValidationTest(SuperListsFunctionalTest):
         self.browser.find_element_by_id('id_new_item').send_keys(Keys.ENTER)
 
         # She recieves a similar warning on the list page
-        wait_for(self.assertEqual,
+        wait_for(lambda: self.assertEqual(
                  self.browser.find_element_by_css_selector('.has-error').text,
-                 "You can't have an empty list item"
+                 "You can't have an empty list item")
                 )
         # And she can correct it by filling some text in
+        sleep(1)
         self.browser.find_element_by_id('id_new_item').send_keys('Make tea')
         self.browser.find_element_by_id('id_new_item').send_keys(Keys.ENTER)
+        
         self.check_for_row_in_list_table('1: Buy milk')
         self.check_for_row_in_list_table('2: Make tea')
