@@ -60,3 +60,9 @@ class SuperListsFunctionalTest(StaticLiveServerTestCase):
         rows = table.find_elements_by_tag_name('tr')
         self.assertIn(row_txt, [row.text for row in rows])
         return
+
+    def get_item_input_box(self):
+        """
+        returns the input box for entering a new list item
+        """
+        return self.browser.find_element_by_id('id_text')
