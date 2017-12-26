@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.utils.html import escape
 
 from lists.models import Item, List
+from lists.forms import ItemForm
 
 class HomePageTest(TestCase):
     """
@@ -58,9 +59,15 @@ class ListViewTest(TestCase):
         correct_list = List.objects.create()
         other_list = List.objects.create()
         response = self.client.get(f'/lists/{correct_list.id}/')
-
         self.assertEqual(response.context['list'], correct_list)
-        
+    
+    def test_home_page_uses_item_form(self):
+        """
+        Tests that the home page uses the item form
+        """
+        response = self.client.get('/')
+        self.assertIsInstance(response.context['form'], ItemForm)
+
 class NewListTest(TestCase):
     """
     Tests that new items and lists can be create
