@@ -23,28 +23,22 @@ class ItemValidationTest(SuperListsFunctionalTest):
 
         # The home page refreshes, and there is an error message saying
         # tha list items cannot be blank
-        wait_for(lambda: self.assertEqual(
-                 self.browser.find_element_by_css_selector('.has-error').text,
-                 "You can't have an empty list item")
-                )
+        wait_for(lambda: self.browser.find_element_by_css_selector('#id_text:invalid'))
         # She tries again with some text for the tem, which now works
-        self.browser.get(self.live_server_url)
+        #self.browser.get(self.live_server_url)
         self.get_item_input_box().send_keys('Buy milk')
+        wait_for(lambda: self.browser.find_element_by_css_selector('#id_text:valid'))
         self.get_item_input_box().send_keys(Keys.ENTER)
         self.check_for_row_in_list_table('1: Buy milk')
-
+        
         # Perversely, she now decided to submit a second blank list item.
-        self.browser.get_item_input_box().send_keys(Keys.ENTER)
+        self.get_item_input_box().send_keys(Keys.ENTER)
 
         # She recieves a similar warning on the list page
-        wait_for(lambda: self.assertEqual(
-                 self.browser.find_element_by_css_selector('.has-error').text,
-                 "You can't have an empty list item")
-                )
+        wait_for(lambda: self.browser.find_element_by_css_selector('#id_text:invalid'))
         # And she can correct it by filling some text in
-        sleep(1)
-        self.browser.get_item_input_box().send_keys('Make tea')
-        self.browser.get_item_input_box().send_keys(Keys.ENTER)
-        
+        self.get_item_input_box().send_keys('Make tea')
+        self.get_item_input_box().send_keys(Keys.ENTER)
+        wait_for(lambda: self.browser.find_element_by_css_selector('#id_text:valid'))
         self.check_for_row_in_list_table('1: Buy milk')
         self.check_for_row_in_list_table('2: Make tea')
