@@ -63,3 +63,23 @@ class ItemValidationTest(SuperListsFunctionalTest):
             self.wait_for_css_selector('.has-error').text,
             "You've already got this in your list"
         )
+
+    def test_error_messages_are_cleared_on_input(self):
+        """
+        Tests that the error messages are no longer visable 
+        once correct input is entered
+        """
+        # Edith starts a list and causes a validation error
+        self.browser.get(self.live_server_url)
+        self.get_item_input_box().send_keys('Buy wellies')
+        self.get_item_input_box().send_keys(Keys.ENTER)
+        self.check_for_row_in_list_table('1: Buy wellies')
+        self.get_item_input_box().send_keys('Buy wellies')
+        self.get_item_input_box().send_keys(Keys.ENTER)
+        self.assertTrue(self.wait_for_css_selector('.has-error').is_displayed())
+
+        # She starts typing in the input box to clear the error
+        self.get_item_input_box().send_keys('a')
+
+        # She ispleased to see that the error message disappears
+        self.assertFalse(self.wait_for_css_selector('.has-error').is_displayed())
