@@ -66,3 +66,7 @@ class SuperListsFunctionalTest(StaticLiveServerTestCase):
         returns the input box for entering a new list item
         """
         return self.browser.find_element_by_id('id_text')
+
+    @wait_for
+    def wait_for_css_selector(self, css):
+        return self.browser.find_element_by_css_selector(css)
