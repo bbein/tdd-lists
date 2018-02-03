@@ -5,7 +5,6 @@ import time
 import re
 
 from django.core import mail
-from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
 from .base import SuperListsFunctionalTest

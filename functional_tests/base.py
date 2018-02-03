@@ -8,6 +8,7 @@ import time
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import StaleElementReferenceException
 
 MAX_WAIT = 10
 
@@ -24,7 +25,7 @@ def wait_for(func):
         while True:
             try:
                 return func(*args, **kwargs)
-            except (AssertionError, WebDriverException) as exc:
+            except (AssertionError, WebDriverException, StaleElementReferenceException) as exc:
                 if time.time() - start_time > MAX_WAIT:
                     print(time.time() - start_time)
                     raise exc
@@ -69,4 +70,11 @@ class SuperListsFunctionalTest(StaticLiveServerTestCase):
 
     @wait_for
     def wait_for_css_selector(self, css):
+        """
+        waits until it can find the css selector
+        """
         return self.browser.find_element_by_css_selector(css)
+
+    @wait_for
+    def wait_for_tag_name(self, tag):
+        return self.browser.find_element_by_tag_name(tag)
