@@ -77,4 +77,25 @@ class SuperListsFunctionalTest(StaticLiveServerTestCase):
 
     @wait_for
     def wait_for_tag_name(self, tag):
+        """
+        waits until it can find the tag name
+        """
         return self.browser.find_element_by_tag_name(tag)
+
+    @wait_for
+    def wait_to_be_logged_in(self, email):
+        """
+        waits until the user is logged in
+        """
+        self.browser.find_element_by_link_text('Log out')
+        navbar = self.browser.find_element_by_css_selector('.navbar')
+        self.assertIn(email, navbar.text)
+
+    @wait_for
+    def wait_to_be_logged_out(self, email):
+        """
+        waits until the user is logged out
+        """
+        self.browser.find_element_by_name('email')
+        navbar = self.browser.find_element_by_css_selector('.navbar')
+        self.assertNotIn(email, navbar.text)

@@ -45,7 +45,7 @@ class LoginTest(SuperListsFunctionalTest):
         self.browser.get(url)
 
         # She is logged in!
-        self.assertIn(TEST_EMAIL, self.wait_for_css_selector('.navbar').text)
+        self.wait_to_be_logged_in(TEST_EMAIL)
 
         # She sees a log out button in the navbar
         self.assertIn('Log out', self.browser.find_element_by_link_text('Log out').text)
@@ -54,4 +54,4 @@ class LoginTest(SuperListsFunctionalTest):
         self.browser.find_element_by_link_text('Log out').click()
 
         # She is logged out
-        self.assertNotIn(TEST_EMAIL, self.wait_for_css_selector('.navbar').text)
+        self.wait_to_be_logged_out(TEST_EMAIL)
